@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expect the Unexpected: What 30 Years of Tennis Data Reveals About Upsets</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Sans+Pro:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Source Sans Pro', sans-serif; background-color: #ffffff; color: #1a1a1a; font-size: 18px; line-height: 1.8; }
+        nav { position: fixed; top: 0; width: 100%; background: rgba(255,255,255,0.95); border-bottom: 2px solid #2d6a2d; padding: 15px 40px; z-index: 1000; display: flex; justify-content: space-between; align-items: center; }
+        nav .logo { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1.2rem; color: #2d6a2d; }
+        nav ul { list-style: none; display: flex; gap: 30px; }
+        nav ul li a { text-decoration: none; color: #1a1a1a; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; transition: color 0.3s; }
+        nav ul li a:hover { color: #2d6a2d; }
+        .hero { min-height: 100vh; background: linear-gradient(135deg, #1a3a1a 0%, #2d6a2d 50%, #1a3a1a 100%); display: flex; align-items: center; justify-content: center; text-align: center; padding: 100px 40px 60px; position: relative; overflow: hidden; }
+        .hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(255,255,255,0.03) 60px, rgba(255,255,255,0.03) 61px); }
+        .hero-content { position: relative; z-index: 1; max-width: 900px; }
+        .hero-tag { display: inline-block; background: rgba(255,255,255,0.15); color: #c8e6c8; padding: 8px 20px; border-radius: 30px; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 30px; }
+        .hero h1 { font-family: 'Playfair Display', serif; font-size: 4rem; font-weight: 900; color: #ffffff; line-height: 1.15; margin-bottom: 30px; }
+        .hero h1 span { color: #c8e6c8; }
+        .hero-subtitle { font-size: 1.3rem; color: rgba(255,255,255,0.85); max-width: 650px; margin: 0 auto 40px; font-weight: 300; }
+        .hero-stats { display: flex; justify-content: center; gap: 60px; margin-top: 50px; padding-top: 40px; border-top: 1px solid rgba(255,255,255,0.2); }
+        .hero-stat { text-align: center; }
+        .hero-stat .number { font-family: 'Playfair Display', serif; font-size: 3rem; font-weight: 900; color: #c8e6c8; display: block; }
+        .hero-stat .label { font-size: 0.85rem; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 1px; }
+        .scroll-indicator { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.6); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; animation: bounce 2s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(10px); } }
+        .section { max-width: 800px; margin: 0 auto; padding: 80px 40px; }
+        .section-full { padding: 80px 40px; background: #f8fbf8; }
+        .section-full .inner { max-width: 800px; margin: 0 auto; }
+        .section-number { font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 3px; color: #2d6a2d; margin-bottom: 15px; }
+        h2 { font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 700; line-height: 1.2; margin-bottom: 25px; color: #1a1a1a; }
+        p { margin-bottom: 20px; color: #333333; }
+        .lead { font-size: 1.25rem; font-weight: 300; color: #1a1a1a; line-height: 1.7; margin-bottom: 25px; }
+        .highlight-box { background: #f0f7f0; border-left: 4px solid #2d6a2d; padding: 25px 30px; margin: 35px 0; border-radius: 0 8px 8px 0; }
+        .highlight-box p { margin: 0; font-size: 1.1rem; color: #1a3a1a; }
+        .figure-container { margin: 40px 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .figure-caption { background: #f8fbf8; padding: 15px 20px; font-size: 0.9rem; color: #666; border-top: 1px solid #e8f5e8; font-style: italic; }
+        .pull-quote { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; color: #2d6a2d; line-height: 1.4; text-align: center; padding: 40px; margin: 40px 0; border-top: 3px solid #2d6a2d; border-bottom: 3px solid #2d6a2d; }
+        footer { background: #1a3a1a; color: rgba(255,255,255,0.7); padding: 60px 40px; text-align: center; }
+        footer p { color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 10px; }
+        footer a { color: #c8e6c8; text-decoration: none; }
+        .fade-in { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease, transform 0.8s ease; }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+        .plotly-chart { width: 100%; height: 450px; }
+        .plotly-chart-tall { width: 100%; height: 600px; }
+        @media (max-width: 768px) { .hero h1 { font-size: 2.5rem; } .hero-stats { gap: 30px; } .hero-stat .number { font-size: 2rem; } h2 { font-size: 1.8rem; } .pull-quote { font-size: 1.4rem; } nav ul { display: none; } }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">🎾 Tennis Upsets</div>
+        <ul>
+            <li><a href="#upsets">Upsets</a></li>
+            <li><a href="#ranking">Rankings</a></li>
+            <li><a href="#tournaments">Tournaments</a></li>
+            <li><a href="#surface">Surface</a></li>
+            <li><a href="#rounds">Rounds</a></li>
+            <li><a href="#model">Model</a></li>
+        </ul>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-tag">Data Analysis · Tennis · 1991-2024</div>
+            <h1>Expect the <span>Unexpected</span></h1>
+            <p class="hero-subtitle">What 30 years of tennis data reveals about shock results - and why your favourite player keeps losing to nobody</p>
+            <div class="hero-stats">
+                <div class="hero-stat"><span class="number">29,348</span><span class="label">Matches Analysed</span></div>
+                <div class="hero-stat"><span class="number">34</span><span class="label">Years of Data</span></div>
+                <div class="hero-stat"><span class="number">31%</span><span class="label">Overall Upset Rate</span></div>
+            </div>
+        </div>
+        <div class="scroll-indicator">Scroll to explore</div>
+    </section>
+
+    <section class="section fade-in" id="upsets">
+        <div class="section-number">Part One</div>
+        <h2>The Day Nobody Saw Coming</h2>
+        <p class="lead">On July 1st 2014, a 19-year-old Australian nobody had heard of walked onto Centre Court at Wimbledon and did something that had not happened since 1992.</p>
+        <p>Nick Kyrgios, ranked 144th in the world, dismantled world number 1 Rafael Nadal in four sets - serving 37 aces, hitting 70 winners, and producing one of the most audacious between-the-legs shots the sport has ever seen. The bookmakers had given him roughly a 6.7% chance of winning. The pundits had written him off before a ball was hit.</p>
+        <p>And yet there it was - one of the greatest upsets in tennis history, live on Centre Court.</p>
+        <div class="highlight-box"><p>But here is the thing: was it really that surprising? And more importantly, are upsets in tennis actually as random as they feel in the moment?</p></div>
+        <p>To answer that, we analysed over 29,000 matches from Grand Slams and Masters 1000 tournaments between 1991 and 2024. What we found challenges some of tennis most deeply held assumptions.</p>
+    </section>
+
+    <section class="section-full fade-in">
+        <div class="inner">
+            <div class="section-number">Part Two</div>
+            <h2>How Common Are Upsets, Really?</h2>
+            <p class="lead">Before we dig into the patterns, let us establish the baseline. Across all Grand Slam and Masters 1000 matches in our dataset, how often does the lower-ranked player actually win?</p>
+            <p>The answer might surprise you.</p>
+            <div class="figure-container">
+                <div id="fig1" class="plotly-chart"></div>
+                <div class="figure-caption">Figure 1: Upset rates by tournament level across 29,348 matches (1991-2024). Only matches with a ranking gap of at least 10 places included.</div>
+            </div>
+            <p>Nearly 1 in 3 matches ends in an upset. But look more closely - Masters 1000 events sit well above the overall average at 34%, while Grand Slams come in below it at 28.2%. The sport biggest stages are actually its most predictable.</p>
+            <div class="pull-quote">"Nearly 1 in 3 matches ends in an upset. Upsets are not rare anomalies - they are a fundamental feature of professional tennis."</div>
+        </div>
+    </section>
+
+    <section class="section fade-in" id="ranking">
+        <div class="section-number">Part Three</div>
+        <h2>Does Ranking Actually Tell the Whole Story?</h2>
+        <p class="lead">When we talk about upsets, we tend to think in binary terms - the better player lost. But better covers a lot of ground.</p>
+        <p>A world number 5 losing to a world number 15 feels very different from a world number 1 losing to a world number 144. So we broke the data down by the size of the ranking gap between the two players.</p>
+        <div class="figure-container">
+            <div id="fig2" class="plotly-chart"></div>
+            <div class="figure-caption">Figure 2: Upset rates by ranking gap. Only matches with a gap of at least 10 places included.</div>
+        </div>
+        <p>The pattern is striking - the bigger the ranking gap, the less likely an upset becomes. When two players are closely matched with a gap of 10 to 25 places, upsets happen nearly 38% of the time. But as the gap widens beyond 200 places, that probability drops to around 20%.</p>
+        <p>This brings us back to Nick Kyrgios. With a ranking gap of 143 places against Nadal, our data puts his chances of winning at around 24.6% - low, but far from impossible. The bookmakers priced him at just 6.7% implied probability. Our data suggests the market significantly underestimated his chances.</p>
+        <div class="highlight-box"><p>If betting markets systematically underestimate upset probability, there may be a structural inefficiency - a concept known in economics as market inefficiency. An efficient market should fully incorporate all available historical information into its prices. Clearly, it does not always.</p></div>
+    </section>
+
+    <section class="section-full fade-in" id="tournaments">
+        <div class="inner">
+            <div class="section-number">Part Four</div>
+            <h2>Where Do Upsets Happen Most?</h2>
+            <p class="lead">Not all tournaments are created equal. Let us look at how upset rates vary across individual tournaments.</p>
+            <div class="figure-container">
+                <div id="fig3" class="plotly-chart-tall"></div>
+                <div class="figure-caption">Figure 3: Upset rates by tournament. Grand Slams shown in navy, Masters 1000 in orange.</div>
+            </div>
+            <p>The pattern here is remarkable - every single Masters 1000 event has a higher upset rate than every single Grand Slam. At the bottom, the Australian Open is the most predictable major tournament of all at just 26.6%.</p>
+            <div class="highlight-box"><p>Why might Grand Slams be more predictable? The best-of-five format rewards consistency over brilliance. The prestige brings out the very best in top players. And the longer preparation time means players arrive in peak condition.</p></div>
+        </div>
+    </section>
+
+    <section class="section fade-in" id="surface">
+        <div class="section-number">Part Five</div>
+        <h2>Does Surface Matter?</h2>
+        <p class="lead">Tennis is unique among major sports in that its playing surface changes completely throughout the season.</p>
+        <p>Conventional wisdom holds that clay is the great equaliser, rewarding patience and consistency over raw power. But does the data agree?</p>
+        <div class="figure-container">
+            <div id="fig4" class="plotly-chart"></div>
+            <div class="figure-caption">Figure 4: Upset rates by surface and tournament level. Grass excluded as there are no Masters 1000 events on grass.</div>
+        </div>
+        <p>On hard courts, the gap between Grand Slams and Masters events is the largest of any surface - Masters hard court events see 34.1% upset rates compared to just 27.2% at Grand Slams.</p>
+        <div class="pull-quote">"Hard courts are where the tournament level matters most - Masters events on hard produce 7 percentage points more upsets than Grand Slams on the same surface."</div>
+    </section>
+
+    <section class="section-full fade-in" id="rounds">
+        <div class="inner">
+            <div class="section-number">Part Six</div>
+            <h2>Does It Get More Predictable as the Tournament Progresses?</h2>
+            <p class="lead">Common sense suggests that as a tournament progresses, weaker players get eliminated and matches become more predictable. But is that actually true?</p>
+            <div class="figure-container">
+                <div id="fig5" class="plotly-chart"></div>
+                <div class="figure-caption">Figure 5: Upset rates by round and tournament level. Hover over points to see exact values.</div>
+            </div>
+            <p>First round Masters matches are extraordinarily chaotic, with nearly 44% of matches ending in upsets. By the time we reach the final, that figure drops to around 29% for Masters and 22% for Grand Slams.</p>
+        </div>
+    </section>
+
+    <section class="section fade-in" id="model">
+        <div class="section-number">Part Seven</div>
+        <h2>So What Actually Predicts an Upset?</h2>
+        <p class="lead">We have seen that surface, tournament level, and round all play a role. But which of these factors matters most?</p>
+        <p>To answer that properly, we built a logistic regression model using only information available before the match begins - no serve statistics, no in-match data.</p>
+        <div class="figure-container">
+            <div id="fig6" class="plotly-chart"></div>
+            <div class="figure-caption">Figure 6: Logistic regression model coefficients. Positive values increase upset probability, negative values decrease it.</div>
+        </div>
+        <p>The single biggest predictor of an upset is being in the early rounds of a Masters event. Ranking gap is the strongest negative predictor - but its effect is smaller than the combined influence of tournament level and round.</p>
+        <div class="highlight-box"><p>The model achieves around 53% accuracy - the honest and interesting result. Even with the best available pre-match information, upsets are still genuinely hard to predict. Tennis would be a lot less exciting if they were not.</p></div>
+    </section>
+
+    <section class="section-full fade-in">
+        <div class="inner">
+            <div class="section-number">Part Eight</div>
+            <h2>What This Means for the Betting Markets</h2>
+            <p class="lead">Our finding that Masters events produce significantly more upsets than Grand Slams has a direct implication for sports betting markets.</p>
+            <p>This connects to a broader concept in economics known as market efficiency. An efficient market should fully incorporate all available information into its prices.</p>
+            <div class="highlight-box"><p>Kyrgios was priced at just 6.7% implied probability against Nadal, when our data suggests a player in his ranking bracket wins around 24.6% of the time. That is a gap of nearly 18 percentage points - suggesting the market was dramatically underestimating his chances.</p></div>
+        </div>
+    </section>
+
+    <section class="section fade-in">
+        <div class="section-number">Conclusion</div>
+        <h2>Chaos Has a Pattern</h2>
+        <p class="lead">Tennis upsets are not random. They follow consistent, measurable patterns that 30 years of data make remarkably clear.</p>
+        <p>Nick Kyrgios walking onto Centre Court in 2014 as a 19-year-old ranked 144th in the world felt like a miracle. But in a sport where nearly 1 in 4 matches with that ranking gap ends in an upset, perhaps it was less of a miracle and more of an inevitability waiting to happen.</p>
+        <div class="pull-quote">"The data does not make upsets any less thrilling. If anything, knowing they follow a pattern makes them more fascinating - because the next one is always just around the corner."</div>
+        <p style="font-size: 0.9rem; color: #666; margin-top: 40px;"><strong>Data source:</strong> Jeff Sackmann Tennis ATP dataset (1991-2024). Analysis covers Grand Slam and Masters 1000 matches with a minimum ranking gap of 10 places. Carpet court matches excluded.</p>
+    </section>
+
+    <footer>
+        <p>Expect the Unexpected: What 30 Years of Tennis Data Reveals About Upsets</p>
+        <p>Jago - University of Exeter, BEE2041 Data Science in Economics, 2026</p>
+        <p style="margin-top: 20px;"><a href="https://github.com/Jagow09/Tennis-upsets">View on GitHub</a> · <a href="https://github.com/JeffSackmann/tennis_atp">Data Source</a></p>
+    </footer>
+
+    <script>
+        var NAVY = '#1a3a5c';
+        var ORANGE = '#e8703a';
+        var RED = '#e63946';
+        var avg = 0.3094;
+
+        var layout_base = {
+            plot_bgcolor: 'white',
+            paper_bgcolor: 'white',
+            font: {family: 'Source Sans Pro, sans-serif', size: 13},
+            margin: {t: 60, b: 60, l: 40, r: 40},
+            yaxis: {tickformat: '.0%'},
+            shapes: []
+        };
+
+        function hline(y) {
+            return {
+                type: 'line', xref: 'paper', x0: 0, x1: 1, y0: y, y1: y,
+                line: {color: RED, width: 2, dash: 'dash'}
+            };
+        }
+
+        function avgAnnotation(y, xpos) {
+            return {
+                xref: 'paper', x: xpos || 0.98, y: y, text: 'Average: ' + (y*100).toFixed(1) + '%',
+                showarrow: false, font: {color: RED, size: 12}, xanchor: 'right', yanchor: 'bottom'
+            };
+        }
+
+        // Figure 1
+        Plotly.newPlot('fig1', [{
+            type: 'bar',
+            x: ["Masters 1000", "Grand Slam"],
+            y: [0.34, 0.2821],
+            marker: {color: ["#e8703a", "#1a3a5c"]},
+            text: ["34.0%", "28.2%"],
+            textposition: 'outside',
+            hovertemplate: '<b>%{x}</b><br>Upset Rate: %{y:.1%}<br>Matches: %{customdata}<extra></extra>',
+            customdata: [15275, 14892]
+        }], Object.assign({}, layout_base, {
+            title: {text: 'Upsets Are More Common Than You Think', font: {size: 20}},
+            xaxis: {title: 'Tournament Level'},
+            yaxis: {title: 'Upset Rate', tickformat: '.0%', range: [0, 0.45]},
+            shapes: [hline(avg)],
+            annotations: [avgAnnotation(avg)]
+        }), {responsive: true});
+
+        // Figure 2
+        Plotly.newPlot('fig2', [{
+            type: 'bar',
+            x: ["10-25", "26-50", "51-100", "101-200", "201-500", "500+"],
+            y: [0.3792, 0.3298, 0.2722, 0.2455, 0.2138, 0.2022],
+            marker: {color: NAVY},
+            text: ["37.9%", "33.0%", "27.2%", "24.6%", "21.4%", "20.2%"],
+            textposition: 'outside',
+            hovertemplate: '<b>Ranking Gap: %{x}</b><br>Upset Rate: %{y:.1%}<br>Matches: %{customdata}<extra></extra>',
+            customdata: [7402, 8859, 8028, 3788, 1277, 272]
+        }], Object.assign({}, layout_base, {
+            title: {text: 'The Bigger the Gap, the Less Likely the Upset', font: {size: 20}},
+            xaxis: {title: 'Ranking Gap Between Players'},
+            yaxis: {title: 'Upset Rate', tickformat: '.0%', range: [0, 0.5]},
+            shapes: [hline(avg)],
+            annotations: [avgAnnotation(avg)]
+        }), {responsive: true});
+
+        // Figure 3
+        Plotly.newPlot('fig3', [
+            {
+                type: 'bar', orientation: 'h',
+                x: [0.2656, 0.2787, 0.2879, 0.2965, 0.3084, 0.3119, 0.3216, 0.3227, 0.3305, 0.3355, 0.3423, 0.3426, 0.3544, 0.3647, 0.3958],
+                y: ["Australian Open", "US Open", "Roland Garros", "Wimbledon", "Paris Masters", "Shanghai Masters", "Rome Masters", "Monte Carlo Masters", "Cincinnati Masters", "Madrid Masters", "Indian Wells Masters", "Canada Masters", "Miami Masters", "Hamburg Masters", "Stuttgart Masters"],
+                marker: {color: ["#1a3a5c", "#1a3a5c", "#1a3a5c", "#1a3a5c", "#e8703a", "#e8703a", "#e8703a", "#e8703a", "#e8703a", "#e8703a", "#e8703a", "#e8703a", "#e8703a", "#e8703a", "#e8703a"]},
+                text: ["26.6%", "27.9%", "28.8%", "29.6%", "30.8%", "31.2%", "32.2%", "32.3%", "33.1%", "33.6%", "34.2%", "34.3%", "35.4%", "36.5%", "39.6%"],
+                textposition: 'outside',
+                hovertemplate: '<b>%{y}</b><br>Upset Rate: %{x:.1%}<br>Matches: %{customdata}<extra></extra>',
+                customdata: [3750, 3750, 3723, 3669, 655, 638, 1701, 1503, 1534, 936, 2223, 1547, 2703, 872, 144],
+                showlegend: false
+            },
+            {type: 'bar', orientation: 'h', x: [null], y: [null], marker: {color: NAVY}, name: 'Grand Slam'},
+            {type: 'bar', orientation: 'h', x: [null], y: [null], marker: {color: ORANGE}, name: 'Masters 1000'}
+        ], Object.assign({}, layout_base, {
+            title: {text: 'Grand Slams Are the Most Predictable Major Tournaments', font: {size: 20}},
+            xaxis: {title: 'Upset Rate', tickformat: '.0%', range: [0, 0.5]},
+            yaxis: {title: ''},
+            margin: {t: 60, b: 60, l: 200, r: 120},
+            shapes: [{
+                type: 'line', yref: 'paper', y0: 0, y1: 1, x0: avg, x1: avg,
+                line: {color: RED, width: 2, dash: 'dash'}
+            }],
+            annotations: [{
+                yref: 'paper', y: 1, x: avg,
+                text: 'Average: ' + (avg*100).toFixed(1) + '%',
+                showarrow: false, font: {color: RED, size: 12}, xanchor: 'left', yanchor: 'bottom'
+            }],
+            legend: {x: 0.75, y: 0.05}
+        }), {responsive: true});
+
+        // Figure 4
+        Plotly.newPlot('fig4', [
+            {
+                type: 'bar', name: 'Grand Slam',
+                x: ["Clay", "Hard"],
+                y: [0.2879, 0.2721],
+                marker: {color: NAVY},
+                text: ["28.8%", "27.2%"],
+                textposition: 'outside'
+            },
+            {
+                type: 'bar', name: 'Masters 1000',
+                x: ["Clay", "Hard"],
+                y: [0.33, 0.3411],
+                marker: {color: ORANGE},
+                text: ["33.0%", "34.1%"],
+                textposition: 'outside'
+            }
+        ], Object.assign({}, layout_base, {
+            title: {text: 'Masters Events Are More Unpredictable on Every Surface', font: {size: 20}},
+            xaxis: {title: 'Surface'},
+            yaxis: {title: 'Upset Rate', tickformat: '.0%', range: [0, 0.45]},
+            barmode: 'group',
+            shapes: [hline(avg)],
+            annotations: [avgAnnotation(avg)],
+            legend: {x: 0.75, y: 0.95}
+        }), {responsive: true});
+
+        // Figure 5
+        Plotly.newPlot('fig5', [
+            {
+                type: 'scatter', mode: 'lines+markers', name: 'Grand Slam',
+                x: ["R128", "R64", "R32", "R16", "QF", "SF", "F"],
+                y: [0.3071, 0.2639, 0.253, 0.2233, 0.2508, 0.213, 0.2188],
+                line: {color: NAVY, width: 3},
+                marker: {size: 10},
+                hovertemplate: '<b>%{x} - Grand Slam</b><br>Upset Rate: %{y:.1%}<extra></extra>'
+            },
+            {
+                type: 'scatter', mode: 'lines+markers', name: 'Masters 1000',
+                x: ["R128", "R64", "R32", "R16", "QF", "SF", "F"],
+                y: [0.4428, 0.359, 0.3079, 0.2934, 0.2758, 0.3026, 0.2903],
+                line: {color: ORANGE, width: 3},
+                marker: {size: 10},
+                hovertemplate: '<b>%{x} - Masters 1000</b><br>Upset Rate: %{y:.1%}<extra></extra>'
+            }
+        ], Object.assign({}, layout_base, {
+            title: {text: 'Upsets Become Rarer as the Tournament Progresses', font: {size: 20}},
+            xaxis: {title: 'Tournament Round'},
+            yaxis: {title: 'Upset Rate', tickformat: '.0%', range: [0, 0.55]},
+            shapes: [hline(avg)],
+            annotations: [avgAnnotation(avg)],
+            legend: {x: 0.75, y: 0.95}
+        }), {responsive: true});
+
+        // Figure 6
+        Plotly.newPlot('fig6', [{
+            type: 'bar', orientation: 'h',
+            x: [-0.2275, -0.0121, -0.0002, 0.0186, 0.0336, 0.0349, 0.0807, 0.1957, 0.2007, 0.3188],
+            y: ["Ranking Gap", "Surface: Hard", "Round: QF", "Round: SF", "Round: R16", "Surface: Grass", "Round: R32", "Round: R64", "Tournament: Masters 1000", "Round: R128"],
+            marker: {color: ["#1a3a5c", "#1a3a5c", "#1a3a5c", "#e8703a", "#e8703a", "#e8703a", "#e8703a", "#e8703a", "#e8703a", "#e8703a"]},
+            hovertemplate: '<b>%{y}</b><br>Coefficient: %{x:.3f}<extra></extra>'
+        }], Object.assign({}, layout_base, {
+            title: {text: 'What Actually Predicts an Upset?', font: {size: 20}},
+            xaxis: {title: 'Effect on Upset Probability'},
+            yaxis: {title: ''},
+            margin: {t: 60, b: 60, l: 200, r: 40},
+            shapes: [{
+                type: 'line', yref: 'paper', y0: 0, y1: 1, x0: 0, x1: 0,
+                line: {color: 'black', width: 1.5}
+            }]
+        }), {responsive: true});
+
+        // Scroll animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('visible');
+            });
+        }, {threshold: 0.1});
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) target.scrollIntoView({behavior: 'smooth', block: 'start'});
+            });
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9f5f00916f8963ef',t:'MTc3NzgwODU0NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
